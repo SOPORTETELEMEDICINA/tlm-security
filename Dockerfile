@@ -22,6 +22,6 @@ ADD target/nio-security-0.0.9-SNAPSHOT.jar app.jar
 ENV JAVA_OPTS="-Xmx1024m -Xss128m"
 ENV JRE_KEYSTORE=$JAVA_HOME/jre/lib/security/cacerts
 ENV CER_DIR=$JAVA_HOME/jre/lib/security/STAR_telemedicina_lat.crt
-RUN keytool -import -alias ece.telemedicina.lat -storepass changeit -noprompt -keystore $JRE_KEYSTORE -trustcacerts -file $CER_DIR
+RUN keytool -import -alias cct.telemedicina.lat -storepass changeit -noprompt -keystore $JRE_KEYSTORE -trustcacerts -file $CER_DIR
 # SECCION PARA PRODUCCION TERMINA
 ENTRYPOINT exec java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar

@@ -21,7 +21,7 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.antMatcher("/**").authorizeRequests().
-                antMatchers("/oauth/token**","/oauth/authorize", "/users/recoverPassword**",
+                antMatchers("/oauth/token**","/oauth/authorize", "/users/recoverPassword**","/users/hashPass**",
                         "/v2/api-docs**","/info","/sockets**", "users/findImageByUsername**",
                         "/new-user/link**", "/new-user/find**")
                 .permitAll()

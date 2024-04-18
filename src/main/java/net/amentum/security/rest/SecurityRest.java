@@ -62,6 +62,12 @@ public class SecurityRest extends BaseController{
         return passwordRequestService.sendPasswordRequest(email);
     }
 
+    @RequestMapping(value="hashPass",method=RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    public String hashPass(@RequestParam(required = true)String user,@RequestParam(required = true)String pass) throws GenericException{
+        return passwordRequestService.hashPass(user,pass);
+    }
+
 
     @RequestMapping(value="changePassword",method=RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)

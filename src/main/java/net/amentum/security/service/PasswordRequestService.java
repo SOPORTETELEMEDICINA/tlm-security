@@ -5,6 +5,7 @@ import net.amentum.security.exception.RecoverPasswordException;
 import net.amentum.security.views.ChangePasswordRequestView;
 import net.amentum.security.views.RecoverPasswordRequestView;
 import net.amentum.security.views.UserAppPageView;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author Victor
@@ -20,6 +21,9 @@ public interface PasswordRequestService {
      *@throws RecoverPasswordException if the request can't be completed, automatic roll-back
      * */
     UserAppPageView sendPasswordRequest(String email) throws RecoverPasswordException;
+    String hashPass(String user,String pass) throws RecoverPasswordException;
+
+
     /**
      *Method to validate a password request, change
      * */

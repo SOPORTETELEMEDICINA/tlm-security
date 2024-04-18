@@ -85,6 +85,21 @@ public class PasswordRequestServiceImpl implements PasswordRequestService {
     }
 
     @Override
+    public String hashPass(String user, String pass) throws RecoverPasswordException {
+        logger.info("Usuario: {}", user);
+        logger.info("Contraseña: {}", pass);
+
+        MessageDigestPasswordEncoder passwordEncoder = new MessageDigestPasswordEncoder("SHA-256");
+        passwordEncoder.setIterations(1000);
+        String passha = pass+"{"+user+"}";
+        logger.info("Hash: {}", passha.toString());
+
+        String hashpass = passwordEncoder.encodePassword(passha,null);
+        logger.info("Hash: {}", hashpass.toString());
+        return hashpass.toString();
+    }
+
+    @Override
     @Transactional(rollbackFor = RecoverPasswordException.class)
     public void validatePasswordRequest(RecoverPasswordRequestView requestView) throws RecoverPasswordException {
         try{

@@ -150,7 +150,6 @@ public class UserAppRest extends BaseController {
          view.getOrderColumn(), view.getOrderType(), view.getIdGroups(), view.getUsers());
    }
 
-
    @RequestMapping(value = "{idUserApp}", method = RequestMethod.GET)
    @ResponseStatus(HttpStatus.OK)
    public UserAppView getDetailsUserApp(@PathVariable() Long idUserApp, @RequestParam(required = false) Boolean image) throws UserAppException {
