@@ -209,7 +209,7 @@ public class UserAppServiceImpl implements UserAppService {
             }
          }
 
-         if(userAppRepository.findByTelefono(userAppView.getTelefono()) != null) {
+         if(userAppRepository.findByTelefono(userAppView.getTelefono()) != null && userAppView.getIdTipoUsuario() != 2) {
             logger.error("===>>>Teléfono DUPLICADO: {}", userAppView.getTelefono());
             UserAppException uae = new UserAppException("Existe un error -" +
                     " Teléfono DUPLICADO: " + userAppView.getTelefono(), UserAppException.LAYER_DAO, UserAppException.ACTION_VALIDATE);
