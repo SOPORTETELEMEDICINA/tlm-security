@@ -199,17 +199,16 @@ public class UserAppServiceImpl implements UserAppService {
             throw uae;
          }
 
-         if(userAppView.getEmail() != null) {
-            if (userAppRepository.findByEmail(userAppView.getEmail()) != null) {
-               logger.error("===>>>Correo DUPLICADO: {}", userAppView.getEmail());
-               UserAppException uae = new UserAppException("Existe un error -" +
-                       " Correo DUPLICADO: " + userAppView.getEmail(), UserAppException.LAYER_DAO, UserAppException.ACTION_VALIDATE);
-               uae.addError("Correo DUPLICADO: " + userAppView.getEmail());
-               throw uae;
-            }
+         if (userAppView.getEmail() != null && userAppRepository.findByEmail(userAppView.getEmail()) != null) {
+            logger.error("===>>>Correo DUPLICADO: {}", userAppView.getEmail());
+            UserAppException uae = new UserAppException("Existe un error -" +
+                    " Correo DUPLICADO: " + userAppView.getEmail(), UserAppException.LAYER_DAO, UserAppException.ACTION_VALIDATE);
+            uae.addError("Correo DUPLICADO: " + userAppView.getEmail());
+            throw uae;
          }
 
-         if(userAppRepository.findByTelefono(userAppView.getTelefono()) != null && userAppView.getIdTipoUsuario() != 3) {
+         List<UserApp> usersWithSamePhone = userAppRepository.findByTelefono(userAppView.getTelefono());
+         if (!usersWithSamePhone.isEmpty() && userAppView.getIdTipoUsuario() != 3) {
             logger.error("===>>>Teléfono DUPLICADO: {}", userAppView.getTelefono());
             UserAppException uae = new UserAppException("Existe un error -" +
                     " Teléfono DUPLICADO: " + userAppView.getTelefono(), UserAppException.LAYER_DAO, UserAppException.ACTION_VALIDATE);

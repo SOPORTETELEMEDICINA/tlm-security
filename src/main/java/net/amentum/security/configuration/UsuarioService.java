@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service("userDetailsService")
 @Slf4j
@@ -29,18 +30,31 @@ public class UsuarioService implements UserDetailsService {
         try {
             UserApp byUserName = repository.findByUsername(username);
             UserApp byUserEmail = repository.findByEmail(username);
-            UserApp byUserPhone = repository.findByTelefono(username);
-            if(byUserName == null && byUserEmail == null && byUserPhone == null)
+            List<UserApp> byUserPhoneList = repository.findByTelefono(username);
+            UserApp byUserPhone = null;
+
+            // Manejo de la lista de usuarios por teléfono
+            if (!byUserPhoneList.isEmpty()) {
+                byUserPhone = byUserPhoneList.get(0); // Se asume que se quiere el primer resultado, ajustar si es necesario
+            }
+
+            if(byUserName == null && byUserEmail == null && byUserPhone == null) {
                 throw new UsernameNotFoundException(username);
+            }
+
             ArrayList<GrantedAuthority> roles = new ArrayList<>();
+
             if(byUserName != null && byUserName.getStatus().equals(RowStatus.ACTIVO)) {
-                byUserName.getPermissionList().forEach(userHasPermission -> roles.add(new SimpleGrantedAuthority(userHasPermission.getUserHasPermissionId().getModulePermission().getCodeModulePermission())));
+                byUserName.getPermissionList().forEach(userHasPermission ->
+                        roles.add(new SimpleGrantedAuthority(userHasPermission.getUserHasPermissionId().getModulePermission().getCodeModulePermission())));
                 return new User(byUserName.getUsername(), byUserName.getPassword(), roles);
             } else if(byUserEmail != null && byUserEmail.getStatus().equals(RowStatus.ACTIVO)) {
-                byUserEmail.getPermissionList().forEach(userHasPermission -> roles.add(new SimpleGrantedAuthority(userHasPermission.getUserHasPermissionId().getModulePermission().getCodeModulePermission())));
+                byUserEmail.getPermissionList().forEach(userHasPermission ->
+                        roles.add(new SimpleGrantedAuthority(userHasPermission.getUserHasPermissionId().getModulePermission().getCodeModulePermission())));
                 return new User(byUserEmail.getUsername(), byUserEmail.getPassword2(), roles);
             } else if(byUserPhone != null && byUserPhone.getStatus().equals(RowStatus.ACTIVO)) {
-                byUserPhone.getPermissionList().forEach(userHasPermission -> roles.add(new SimpleGrantedAuthority(userHasPermission.getUserHasPermissionId().getModulePermission().getCodeModulePermission())));
+                byUserPhone.getPermissionList().forEach(userHasPermission ->
+                        roles.add(new SimpleGrantedAuthority(userHasPermission.getUserHasPermissionId().getModulePermission().getCodeModulePermission())));
                 return new User(byUserPhone.getUsername(), byUserPhone.getPassword3(), roles);
             } else
                 throw new UsernameNotFoundException(username);
