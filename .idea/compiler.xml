@@ -10,8 +10,5 @@
         <module name="nio-security" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="nio-security" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>
