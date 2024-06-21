@@ -1,6 +1,7 @@
 package net.amentum.security.views;
 
 
+import net.amentum.security.model.UserSignature;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -58,9 +59,11 @@ public class UserAppView implements Serializable {
     private List<UsersAssignedView> infoUsers = new ArrayList<>();
 
     ////////////////////////////////////////////// catalogo tipo usuario
-   private Integer idTipoUsuario;
-   private String descripcion;
+    private Integer idTipoUsuario;
+    private String descripcion;
    ////////////////////////////////////////////// catalogo tipo usuario
+
+    private UserSignatureView signature;
 
     public Long getIdUserApp() {
         return idUserApp;
@@ -264,6 +267,8 @@ public class UserAppView implements Serializable {
     public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
+
+    public UserSignatureView getUserSignature() { return this.signature; }
 
     @Override
     public String toString() {

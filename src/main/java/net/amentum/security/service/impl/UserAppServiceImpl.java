@@ -3,19 +3,10 @@ package net.amentum.security.service.impl;
 
 import net.amentum.security.Utils;
 import net.amentum.security.converter.UserImageConverter;
+import net.amentum.security.converter.UserSignatureConverter;
 import net.amentum.security.exception.ExceptionServiceCode;
 import net.amentum.security.exception.UserAppException;
-import net.amentum.security.model.Group;
-import net.amentum.security.model.ModulePermission;
-import net.amentum.security.model.Profile;
-import net.amentum.security.model.RowStatus;
-import net.amentum.security.model.UserApp;
-import net.amentum.security.model.UserExtraInfo;
-import net.amentum.security.model.UserHasBoss;
-import net.amentum.security.model.UserHasGroup;
-import net.amentum.security.model.UserHasGroupId;
-import net.amentum.security.model.UserHasPermission;
-import net.amentum.security.model.UserImage;
+import net.amentum.security.model.*;
 import net.amentum.security.persistence.*;
 import net.amentum.security.rest.UserAppRest;
 import net.amentum.security.service.UserAppService;
@@ -90,6 +81,10 @@ public class UserAppServiceImpl implements UserAppService {
 
    private EmailService emailService;
 
+   private UserSignatureRepository userSignatureRepository;
+
+   private UserSignatureConverter userSignatureConverter;
+
    @Autowired
    public void setEmailService(EmailService emailService) {
       this.emailService = emailService;
@@ -98,6 +93,11 @@ public class UserAppServiceImpl implements UserAppService {
    @Autowired
    public void setUserImageRepository(UserImageRepository userImageRepository) {
       this.userImageRepository = userImageRepository;
+   }
+
+   @Autowired
+   public void setUserSignatureRepository(UserSignatureRepository userSignatureRepository) {
+      this.userSignatureRepository = userSignatureRepository;
    }
 
    ////////////////////////////////////////////// catalogo tipo usuario
@@ -163,6 +163,11 @@ public class UserAppServiceImpl implements UserAppService {
    @Autowired
    public void setUserHasPermissionRepository(UserHasPermissionRepository userHasPermissionRepository) {
       this.userHasPermissionRepository = userHasPermissionRepository;
+   }
+
+   @Autowired
+   public void setUserSignatureConverter(UserSignatureConverter userSignatureConverter) {
+      this.userSignatureConverter = userSignatureConverter;
    }
 
    private final Map<String, Object> colOrderNames = new HashMap<>();
@@ -232,6 +237,22 @@ public class UserAppServiceImpl implements UserAppService {
                userHassBossRepository.save(boss);
             }
          }
+
+         if (userAppView.getUserSignature().getImageContent() != null && !userAppView.getUserSignature().getImageContent().isEmpty()) {
+            if(userAppView.getUserSignature().getImageContentType().contains("image/")) {
+               UserSignature exits = userSignatureRepository.existsUserSignatureByUserAppId(userAppView.getIdUserApp());
+
+               UserSignature entityToUpdate = exits == null ? new UserSignature() : exits;
+
+               entityToUpdate.setUserAppId(user.getUserAppId());
+               entityToUpdate.setImageContentType(userAppView.getUserSignature().getImageContentType());
+               entityToUpdate.setSignatureName(userAppView.getUserSignature().getSignatureName());
+               entityToUpdate.setImageContent(userSignatureConverter.fromBase64ToByte(userAppView.getUserSignature().getImageContent()));
+
+               userSignatureRepository.save(entityToUpdate);
+            }
+         }
+
          return convertEntityToView(user, Boolean.FALSE, Boolean.FALSE);
       } catch (UserAppException uae) {
          throw uae;
