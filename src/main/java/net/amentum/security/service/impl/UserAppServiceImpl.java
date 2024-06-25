@@ -3,32 +3,24 @@ package net.amentum.security.service.impl;
 
 import net.amentum.security.Utils;
 import net.amentum.security.converter.UserImageConverter;
-import net.amentum.security.converter.UserSignatureConverter;
 import net.amentum.security.exception.ExceptionServiceCode;
 import net.amentum.security.exception.UserAppException;
 import net.amentum.security.model.*;
 import net.amentum.security.persistence.*;
-import net.amentum.security.rest.UserAppRest;
 import net.amentum.security.service.UserAppService;
-import net.amentum.security.utils.email.Email;
 import net.amentum.security.utils.email.EmailService;
-import net.amentum.security.utils.email.EmailTemplate;
 import net.amentum.security.views.*;
 import org.apache.commons.codec.binary.Base64;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specifications;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +31,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -81,10 +72,6 @@ public class UserAppServiceImpl implements UserAppService {
 
    private EmailService emailService;
 
-   private UserSignatureRepository userSignatureRepository;
-
-   private UserSignatureConverter userSignatureConverter;
-
    @Autowired
    public void setEmailService(EmailService emailService) {
       this.emailService = emailService;
@@ -93,11 +80,6 @@ public class UserAppServiceImpl implements UserAppService {
    @Autowired
    public void setUserImageRepository(UserImageRepository userImageRepository) {
       this.userImageRepository = userImageRepository;
-   }
-
-   @Autowired
-   public void setUserSignatureRepository(UserSignatureRepository userSignatureRepository) {
-      this.userSignatureRepository = userSignatureRepository;
    }
 
    ////////////////////////////////////////////// catalogo tipo usuario
@@ -165,11 +147,6 @@ public class UserAppServiceImpl implements UserAppService {
       this.userHasPermissionRepository = userHasPermissionRepository;
    }
 
-   @Autowired
-   public void setUserSignatureConverter(UserSignatureConverter userSignatureConverter) {
-      this.userSignatureConverter = userSignatureConverter;
-   }
-
    private final Map<String, Object> colOrderNames = new HashMap<>();
 
    {
@@ -235,21 +212,6 @@ public class UserAppServiceImpl implements UserAppService {
                boss.setUserApp(userAppRepository.findOne(idUser));
                boss.setUserAppBoss(user);
                userHassBossRepository.save(boss);
-            }
-         }
-
-         if (userAppView.getUserSignature().getImageContent() != null && !userAppView.getUserSignature().getImageContent().isEmpty()) {
-            if(userAppView.getUserSignature().getImageContentType().contains("image/")) {
-               UserSignature exits = userSignatureRepository.existsUserSignatureByUserAppId(userAppView.getIdUserApp());
-
-               UserSignature entityToUpdate = exits == null ? new UserSignature() : exits;
-
-               entityToUpdate.setUserAppId(user.getUserAppId());
-               entityToUpdate.setImageContentType(userAppView.getUserSignature().getImageContentType());
-               entityToUpdate.setSignatureName(userAppView.getUserSignature().getSignatureName());
-               entityToUpdate.setImageContent(userSignatureConverter.fromBase64ToByte(userAppView.getUserSignature().getImageContent()));
-
-               userSignatureRepository.save(entityToUpdate);
             }
          }
 
