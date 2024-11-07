@@ -18,7 +18,7 @@ COPY secret.key /opt/secrets/
 COPY ./src/STAR_telemedicina_lat.crt $JAVA_HOME/jre/lib/security
 VOLUME /tmp
 VOLUME /logs
-ADD target/nio-security-0.0.9-SNAPSHOT.jar app.jar
+ADD target/nio-security-0.0.11-SNAPSHOT.jar app.jar
 ENV JAVA_OPTS="-Xmx1024m -Xss128m"
 ENV JRE_KEYSTORE=$JAVA_HOME/jre/lib/security/cacerts
 ENV CER_DIR=$JAVA_HOME/jre/lib/security/STAR_telemedicina_lat.crt

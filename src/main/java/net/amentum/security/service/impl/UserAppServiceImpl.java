@@ -5,39 +5,22 @@ import net.amentum.security.Utils;
 import net.amentum.security.converter.UserImageConverter;
 import net.amentum.security.exception.ExceptionServiceCode;
 import net.amentum.security.exception.UserAppException;
-import net.amentum.security.model.Group;
-import net.amentum.security.model.ModulePermission;
-import net.amentum.security.model.Profile;
-import net.amentum.security.model.RowStatus;
-import net.amentum.security.model.UserApp;
-import net.amentum.security.model.UserExtraInfo;
-import net.amentum.security.model.UserHasBoss;
-import net.amentum.security.model.UserHasGroup;
-import net.amentum.security.model.UserHasGroupId;
-import net.amentum.security.model.UserHasPermission;
-import net.amentum.security.model.UserImage;
+import net.amentum.security.model.*;
 import net.amentum.security.persistence.*;
-import net.amentum.security.rest.UserAppRest;
 import net.amentum.security.service.UserAppService;
-import net.amentum.security.utils.email.Email;
 import net.amentum.security.utils.email.EmailService;
-import net.amentum.security.utils.email.EmailTemplate;
 import net.amentum.security.views.*;
 import org.apache.commons.codec.binary.Base64;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specifications;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +31,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -232,6 +214,7 @@ public class UserAppServiceImpl implements UserAppService {
                userHassBossRepository.save(boss);
             }
          }
+
          return convertEntityToView(user, Boolean.FALSE, Boolean.FALSE);
       } catch (UserAppException uae) {
          throw uae;

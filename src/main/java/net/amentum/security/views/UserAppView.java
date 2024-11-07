@@ -4,8 +4,6 @@ package net.amentum.security.views;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -58,8 +56,8 @@ public class UserAppView implements Serializable {
     private List<UsersAssignedView> infoUsers = new ArrayList<>();
 
     ////////////////////////////////////////////// catalogo tipo usuario
-   private Integer idTipoUsuario;
-   private String descripcion;
+    private Integer idTipoUsuario;
+    private String descripcion;
    ////////////////////////////////////////////// catalogo tipo usuario
 
     public Long getIdUserApp() {
