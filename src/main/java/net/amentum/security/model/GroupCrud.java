@@ -24,7 +24,7 @@ public class GroupCrud implements Serializable {
 
     @NotNull(message = "Ingrese el id del grupo")
     @Column(name = "id_group")
-    Integer idGroup;
+    Long idGroup;
 
     @NotNull(message = "Ingrese la imagen")
     @Column(name = "image")
@@ -33,4 +33,14 @@ public class GroupCrud implements Serializable {
     @NotNull(message = "Ingrese el color")
     @Column(name = "color")
     String color;
+
+    @Override
+    public String toString() {
+        return "GroupCrudView{" +
+                "idGroupCrud=" + idGroupCrud +
+                ", idGroup='" + idGroup + '\'' +
+                ", image='" + image + '\'' +
+                ", color='" + color + '\'' +
+                '}';
+    }
 }

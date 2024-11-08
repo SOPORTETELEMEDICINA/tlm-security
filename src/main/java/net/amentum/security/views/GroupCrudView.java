@@ -11,7 +11,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class GroupCrudView implements Serializable {
     Long idGroupCrud;
-    Integer idGroup;
+    Long idGroup;
     String image;
     String color;
 
@@ -92,8 +92,12 @@ public class GroupCrudView implements Serializable {
         return result;
     }
 
-        public String toString() {
-            return "GroupCrudView(idGroupCrud=" + this.getIdGroupCrud() + ", idGroup=" + this.getIdGroup() + ", image=" + this.getImage() + ", color=" + this.getColor() + ")";
-        }
-
+    public String toString() {
+        return "GroupCrudView{" +
+                "idGroupCrud=" + idGroupCrud +
+                ", idGroup='" + idGroup + '\'' +
+                ", image='" + image + '\'' +
+                ", color='" + color + '\'' +
+                '}';
+    }
 }
