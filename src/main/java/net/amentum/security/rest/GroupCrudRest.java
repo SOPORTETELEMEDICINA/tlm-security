@@ -55,7 +55,7 @@ public class GroupCrudRest {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
-    public Page<GroupCrudView> findGroups(@RequestParam(required = false) Integer gid, @RequestParam(required = false)Integer page, @RequestParam(required=false)Integer size, @RequestParam(required = false)
+    public Page<GroupCrudView> findGroups(@RequestParam(required = false) Long gid, @RequestParam(required = false)Integer page, @RequestParam(required=false)Integer size, @RequestParam(required = false)
     String orderColumn, @RequestParam(required = false)String orderType) throws GroupCrudException{
         logger.info("{}- Obtener listado de modulos: {} - page {} - size: {} - orderColumn: {} - orderType: {}", ExceptionServiceCode.GROUP, gid, page, size, orderColumn, orderType);
         if(page==null)
@@ -74,7 +74,7 @@ public class GroupCrudRest {
 
     @RequestMapping(value = "image",method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
-    public String findImageGroupCrud(@RequestParam(required = true)Integer gid,@RequestParam(required = true)String color) throws GroupCrudException{
+    public String findImageGroupCrud(@RequestParam(required = true)Long gid,@RequestParam(required = true)String color) throws GroupCrudException{
         return groupCrudService.findImageGroupCrud(gid,color);
     }
 

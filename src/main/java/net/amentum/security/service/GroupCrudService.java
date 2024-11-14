@@ -15,11 +15,11 @@ public interface GroupCrudService {
 
     void deleteGroupCrud(Long groupCrudId) throws GroupCrudException;
 
-    Page<GroupCrudView> findGroupCruds(Integer gid, Integer page, Integer size, String columnOrder, String orderType) throws GroupCrudException;
+    Page<GroupCrudView> findGroupCruds(Long gid, Integer page, Integer size, String columnOrder, String orderType) throws GroupCrudException;
 
     List<GroupCrudView> findAll() throws GroupCrudException;
 
-    String findImageGroupCrud (@NotNull Integer idGroup, @NotNull String color) throws GroupCrudException;
+    String findImageGroupCrud (Long idGroup, String color) throws GroupCrudException;
 
     GroupCrudView findGroupCrud(Long groupCrudId) throws  GroupCrudException;
 

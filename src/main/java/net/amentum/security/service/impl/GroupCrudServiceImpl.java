@@ -107,7 +107,7 @@ public class GroupCrudServiceImpl implements GroupCrudService {
     }
 
     @Override
-    public Page<GroupCrudView> findGroupCruds(Integer gid, Integer page, Integer size, String columnOrder, String orderType) throws GroupCrudException {
+    public Page<GroupCrudView> findGroupCruds(Long gid, Integer page, Integer size, String columnOrder, String orderType) throws GroupCrudException {
         try{
             List<GroupCrudView> groupCrudViewList = new ArrayList<>();
             Page<GroupCrud> groupCrudList = null;
@@ -151,7 +151,7 @@ public class GroupCrudServiceImpl implements GroupCrudService {
     }
 
     @Override
-    public String findImageGroupCrud(Integer idGroup, String color) throws GroupCrudException {
+    public String findImageGroupCrud(Long idGroup, String color) throws GroupCrudException {
         try {
             return groupCrudRepository.findImageGroup(idGroup, color);
         } catch (Exception ex) {

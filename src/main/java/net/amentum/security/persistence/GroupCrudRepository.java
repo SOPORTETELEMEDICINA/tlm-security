@@ -10,8 +10,8 @@ import org.springframework.data.repository.query.Param;
 public interface GroupCrudRepository extends JpaRepository <GroupCrud, Long> {
 
     @Query(value = "SELECT gc FROM GroupCrud gc WHERE gc.idGroup = :gid")
-    Page<GroupCrud> findAllGroupCrudByGroup(@Param("gid") Integer gid, Pageable pageable) throws Exception;
+    Page<GroupCrud> findAllGroupCrudByGroup(@Param("gid") Long gid, Pageable pageable) throws Exception;
 
     @Query(value = "SELECT gc.image FROM GroupCrud gc WHERE gc.idGroup = :gid AND gc.color = :color")
-    String findImageGroup(@Param("gid") Integer gid, @Param("color") String color) throws Exception;
+    String findImageGroup(@Param("gid") Long gid, @Param("color") String color) throws Exception;
 }
