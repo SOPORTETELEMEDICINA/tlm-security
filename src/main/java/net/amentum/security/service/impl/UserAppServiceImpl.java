@@ -224,18 +224,20 @@ public class UserAppServiceImpl implements UserAppService {
          image.setUserAppId(user.getUserAppId());
 
          if (userAppView.getIdTipoUsuario() == 3) {
-            image.setContentType(user.getUserImage().getContentType() != null && !user.getUserImage().getContentType().isEmpty()
-                    ? user.getUserImage().getContentType()
-                    : null);
-            image.setImageContent(user.getUserImage().getImageContent() != null && user.getUserImage().getImageContent().length > 0
-                    ? user.getUserImage().getImageContent()
-                    : null);
-            image.setImageContentSmall(user.getUserImage().getImageContentSmall() != null && user.getUserImage().getImageContentSmall().length > 0
-                    ? user.getUserImage().getImageContentSmall()
-                    : null);
-            image.setImageName(user.getUserImage().getImageName() != null && !user.getUserImage().getImageName().isEmpty()
-                    ? user.getUserImage().getImageName()
-                    : null);
+            if (user.getUserImage() != null) {
+               if (user.getUserImage().getContentType() != null && !user.getUserImage().getContentType().isEmpty()) {
+                  image.setContentType(user.getUserImage().getContentType());
+               }
+               if (user.getUserImage().getImageContent() != null && user.getUserImage().getImageContent().length > 0) {
+                  image.setImageContent(user.getUserImage().getImageContent());
+               }
+               if (user.getUserImage().getImageContentSmall() != null && user.getUserImage().getImageContentSmall().length > 0) {
+                  image.setImageContentSmall(user.getUserImage().getImageContentSmall());
+               }
+               if (user.getUserImage().getImageName() != null && !user.getUserImage().getImageName().isEmpty()) {
+                  image.setImageName(user.getUserImage().getImageName());
+               }
+            }
          }
 
          userImageRepository.save(image);
