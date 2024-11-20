@@ -223,10 +223,20 @@ public class UserAppServiceImpl implements UserAppService {
          image.setUserImageId(user.getUserAppId());
          image.setUserAppId(user.getUserAppId());
 
-         image.setContentType(user.getUserImage().getContentType());
-         image.setImageContent(user.getUserImage().getImageContent());
-         image.setImageContentSmall(user.getUserImage().getImageContentSmall());
-         image.setImageName(user.getUserImage().getImageName());
+         if (userAppView.getIdTipoUsuario() == 3) {
+            image.setContentType(user.getUserImage().getContentType() != null && !user.getUserImage().getContentType().isEmpty()
+                    ? user.getUserImage().getContentType()
+                    : null);
+            image.setImageContent(user.getUserImage().getImageContent() != null && user.getUserImage().getImageContent().length > 0
+                    ? user.getUserImage().getImageContent()
+                    : null);
+            image.setImageContentSmall(user.getUserImage().getImageContentSmall() != null && user.getUserImage().getImageContentSmall().length > 0
+                    ? user.getUserImage().getImageContentSmall()
+                    : null);
+            image.setImageName(user.getUserImage().getImageName() != null && !user.getUserImage().getImageName().isEmpty()
+                    ? user.getUserImage().getImageName()
+                    : null);
+         }
 
          userImageRepository.save(image);
          logger.info("user_image con id {} - {} ", image.getUserAppId(), image.getUserImageId());
