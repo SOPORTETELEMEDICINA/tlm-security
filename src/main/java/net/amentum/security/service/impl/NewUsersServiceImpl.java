@@ -50,7 +50,7 @@ public class NewUsersServiceImpl implements NewUsersService {
 
             if(repository.count(newUserSpec) > 0) {
                 newUser = repository.findByUsernameAndIdGroup(username, idGroup);
-                newUser.setTimeBeforeExpire(addTimeToDate(new Date(), 7, Calendar.DAY_OF_YEAR));
+                newUser.setTimeBeforeExpire(addTimeToDate(new Date(), 30, Calendar.DAY_OF_YEAR));
                 logger.info("Hash actualizado. Resultado {}", newUser);
                 repository.save(newUser);
             } else {
@@ -58,7 +58,7 @@ public class NewUsersServiceImpl implements NewUsersService {
                 newUser.setActive(true);
                 Date date = new Date();
                 newUser.setCreatedDate(date);
-                newUser.setTimeBeforeExpire(addTimeToDate(new Date(), 7, Calendar.DAY_OF_YEAR));
+                newUser.setTimeBeforeExpire(addTimeToDate(new Date(), 30, Calendar.DAY_OF_YEAR));
                 newUser.setUsername(username);
                 newUser.setidUsuario(idUsuario);
                 newUser.setIdGroup(idGroup);
