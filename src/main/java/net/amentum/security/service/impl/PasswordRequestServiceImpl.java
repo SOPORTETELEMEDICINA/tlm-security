@@ -63,10 +63,18 @@ public class PasswordRequestServiceImpl implements PasswordRequestService {
 
     @Override
     @Transactional(rollbackFor = RecoverPasswordException.class)
-    public UserAppPageView sendPasswordRequest(String email) throws RecoverPasswordException {
+    public UserAppPageView sendPasswordRequestByCurp(String curp) throws RecoverPasswordException {
         try {
-            UserApp user = userAppRepository.findByEmailUpper(email.toUpperCase());
-            logger.info("Usuario para restablecer contraseña: " + user.getUsername());
+            UserApp user = userAppRepository.findByCurp(curp);
+            if (user == null) {
+                throw new RecoverPasswordException("No se encontró usuario con la CURP proporcionada",
+                        GenericException.LAYER_SERVICE, GenericException.ACTION_SELECT);
+            }
+
+            String email = user.getEmail();
+            logger.info("Email encontrado por CURP: {}", email);
+
+            // Aquí continúa el flujo como originalmente lo tienes:
             UserAppPageView userAppView = new UserAppPageView();
             userAppView.setIdUserApp(user.getUserAppId());
             userAppView.setUsername(user.getUsername());

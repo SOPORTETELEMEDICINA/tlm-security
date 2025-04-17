@@ -21,6 +21,7 @@ public class UserAppView implements Serializable {
     @NotEmpty(message = "Debe agregar un username")
     private String username;
     private String email;
+    private String curp;
     private String password;
     private String password2;
     private String password3;
@@ -82,6 +83,14 @@ public class UserAppView implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getCurp() {
+        return curp;
+    }
+
+    public void setCurp(String curp) {
+        this.curp = curp;
     }
 
     public String getPassword() {

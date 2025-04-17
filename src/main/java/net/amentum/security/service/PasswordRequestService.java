@@ -17,10 +17,10 @@ public interface PasswordRequestService {
     /**
      *Method to generate new pasword request, this method validate a username and sends email to user with a <br>
      *recover link using a hash parameter with timeout
-     *@param email the email who wants to recover his password
+     *@param curp the email who wants to recover his password
      *@throws RecoverPasswordException if the request can't be completed, automatic roll-back
      * */
-    UserAppPageView sendPasswordRequest(String email) throws RecoverPasswordException;
+    UserAppPageView sendPasswordRequestByCurp(String curp) throws RecoverPasswordException;
     String hashPass(String user,String pass) throws RecoverPasswordException;
 
 

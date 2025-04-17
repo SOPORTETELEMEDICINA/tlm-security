@@ -49,6 +49,9 @@ public class UserApp  implements Serializable {
     @NotEmpty(message = "Debe ingresar el nombre del usuario")
     private String name;
 
+    @Column(name = "curp", unique = true)
+    private String curp;
+
     @Enumerated(EnumType.STRING)
     private RowStatus status;
 
@@ -114,6 +117,14 @@ public class UserApp  implements Serializable {
     public String getEmail() {return email;}
 
     public void setEmail(String email) {this.email = email;}
+
+    public String getCurp() {
+        return curp;
+    }
+
+    public void setCurp(String curp) {
+        this.curp = curp;
+    }
 
     public String getPassword() {return password;}
 

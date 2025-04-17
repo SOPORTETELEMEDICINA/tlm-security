@@ -52,6 +52,8 @@ public interface UserAppRepository extends JpaRepository<UserApp, Long>, JpaSpec
 
     UserApp findByEmail(@NotNull String email) throws Exception;
 
+    UserApp findByCurp(@NotNull String curp) throws Exception;
+
     @Query("SELECT u FROM UserApp u WHERE UPPER(u.email) = UPPER(:email)")
     UserApp findByEmailUpper(@Param("email") String email) throws Exception;
 
