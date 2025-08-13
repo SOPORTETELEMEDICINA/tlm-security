@@ -497,45 +497,88 @@ public class UserAppServiceImpl implements UserAppService {
       }
    }
 
-   @Override
-   @Transactional(readOnly = false, rollbackFor = {UserAppException.class})
-   /**
-    * {@inheritDoc}
-    * */
-   public void deleteUserApp(Long idUserApp) throws UserAppException {
-      try {
-         if (!userAppRepository.exists(idUserApp)) {
-            UserAppException uae = new UserAppException("No se encuentra en el sistema el usuario: " + idUserApp, UserAppException.LAYER_DAO, UserAppException.ACTION_VALIDATE);
-            uae.addError("Usuario no encontrado.");
+    @Override
+    @Transactional(readOnly = false, rollbackFor = {UserAppException.class})
+/**
+ * {@inheritDoc}
+ */
+    public void deleteUserApp(Long idUserApp, String motivo) throws UserAppException {
+        try {
+            // 1) Cargar una vez y validar existencia
+            UserApp user = userAppRepository.findOne(idUserApp);
+            if (user == null) {
+                UserAppException uae = new UserAppException(
+                        "No se encuentra en el sistema el usuario: " + idUserApp,
+                        UserAppException.LAYER_DAO,
+                        UserAppException.ACTION_VALIDATE
+                );
+                uae.addError("Usuario no encontrado.");
+                throw uae;
+            }
+
+            // 2) Validar motivo permitido
+            if (motivo == null || (!"Muerte".equalsIgnoreCase(motivo) && !"Suspension".equalsIgnoreCase(motivo))) {
+                UserAppException uae = new UserAppException(
+                        "Motivo inválido.",
+                        UserAppException.LAYER_SERVICE,
+                        UserAppException.ACTION_VALIDATE
+                );
+                uae.addError("El motivo debe ser 'Muerte' o 'Suspension'.");
+                throw uae;
+            }
+
+            // 3) Inactivar y guardar motivo (UPDATE JPQL)
+            int rows = userAppRepository.updateStatusAndMotivo(RowStatus.INACTIVO, motivo, idUserApp);
+            if (rows == 0) {
+                UserAppException uae = new UserAppException(
+                        "No fue posible inactivar el usuario: " + idUserApp,
+                        UserAppException.LAYER_DAO,
+                        UserAppException.ACTION_UPDATE
+                );
+                uae.addError("El UPDATE no afectó filas.");
+                throw uae;
+            }
+
+            // 4) Inactivar info relacionada (evitar NPE)
+            List<UserExtraInfo> list = user.getInfoList();
+            if (list != null) {
+                for (UserExtraInfo u : list) {
+                    userExtraInfoRepository.updateStatus(RowStatus.INACTIVO, u.getUserExtraInfoId(), new Date());
+                }
+            }
+
+        } catch (DataIntegrityViolationException dte) {
+            UserAppException uae = new UserAppException(
+                    "No fue posible eliminar el usuario " + idUserApp,
+                    UserAppException.LAYER_DAO,
+                    UserAppException.ACTION_DELETE
+            );
+            uae.addError("Ocurrió un error al eliminar el usuario");
+            logger.error(ExceptionServiceCode.USER + "Error al eliminar usuario - CODE: {} - {}", uae.getExceptionCode(), idUserApp, dte);
             throw uae;
-         }
+        } catch (ConstraintViolationException dte) {
+            UserAppException uae = new UserAppException(
+                    "Error al eliminar usuario: " + idUserApp,
+                    UserAppException.LAYER_DAO,
+                    UserAppException.ACTION_DELETE
+            );
+            uae.addError("Ocurrió un error al eliminar el usuario.");
+            logger.error("Error al eliminar usuario. - CODE: {} - {}", uae.getExceptionCode(), idUserApp, dte);
+            throw uae;
+        } catch (UserAppException uae) {
+            throw uae;
+        } catch (Exception ex) {
+            UserAppException uae = new UserAppException(
+                    "No fue posible eliminar el usuario",
+                    UserAppException.LAYER_DAO,
+                    UserAppException.ACTION_DELETE
+            );
+            logger.error("Error al eliminar usuario - CODE: {} - {}", uae.getExceptionCode(), idUserApp, ex);
+            throw uae;
+        }
+    }
 
-         UserApp user = userAppRepository.findOne(idUserApp);
-         userAppRepository.updateStatus(RowStatus.INACTIVO, idUserApp);
-         List<UserExtraInfo> list = user.getInfoList();
-         for (UserExtraInfo u : list) {
-            userExtraInfoRepository.updateStatus(RowStatus.INACTIVO, u.getUserExtraInfoId(), new Date());
-         }
-      } catch (DataIntegrityViolationException dte) {
-         UserAppException uae = new UserAppException("No fue posible eliminar el usuario" + idUserApp, UserAppException.LAYER_DAO, UserAppException.ACTION_DELETE);
-         uae.addError("Ocurrio un error al eliminar el usuario");
-         logger.error(ExceptionServiceCode.USER + "Error al eliminar usuario - CODE: {} - {}", uae.getExceptionCode(), idUserApp, dte);
-         throw uae;
-      } catch (ConstraintViolationException dte) {
-         UserAppException uae = new UserAppException("Error al eliminar usuario: " + idUserApp, UserAppException.LAYER_DAO, UserAppException.ACTION_DELETE);
-         uae.addError("Ocurrio un error al eliminar el usuario.");
-         logger.error("Error al eliminar usuario. - CODE: {} - {}", uae.getExceptionCode(), idUserApp, dte);
-         throw uae;
-      } catch (UserAppException uae) {
-         throw uae;
-      } catch (Exception ex) {
-         UserAppException uae = new UserAppException("No fue posible eliminar el usuario", UserAppException.LAYER_DAO, UserAppException.ACTION_DELETE);
-         logger.error("Error al eliminar usuario - CODE: {} - {}", uae.getExceptionCode(), idUserApp, ex);
-         throw uae;
-      }
-   }
-
-   @Override
+    @Override
    /**
     * {@inheritDoc}
     * */

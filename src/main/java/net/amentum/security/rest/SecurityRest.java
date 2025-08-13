@@ -58,8 +58,8 @@ public class SecurityRest extends BaseController{
 
     @RequestMapping(value="recoverPassword",method=RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
-    public UserAppPageView recoverPassword(@RequestParam(required = true)String email) throws GenericException{
-        return passwordRequestService.sendPasswordRequest(email);
+    public UserAppPageView recoverPassword(@RequestParam(required = true)String curp) throws GenericException{
+        return passwordRequestService.sendPasswordRequestByCurp(curp);
     }
 
     @RequestMapping(value="hashPass",method=RequestMethod.GET)

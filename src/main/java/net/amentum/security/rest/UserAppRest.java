@@ -105,11 +105,11 @@ public class UserAppRest extends BaseController {
    }
 
 
-   @RequestMapping(value = "{idUserApp}", method = RequestMethod.DELETE)
+   @RequestMapping(value = "{idUserApp}/{motivo}", method = RequestMethod.DELETE)
    @ResponseStatus(HttpStatus.OK)
-   public void deleteUserApp(@PathVariable() Long idUserApp) throws UserAppException {
+   public void deleteUserApp(@PathVariable() Long idUserApp, @PathVariable() String motivo) throws UserAppException {
       logger.info("Eliminar usuario: {}", idUserApp);
-      serviceUserApp.deleteUserApp(idUserApp);
+      serviceUserApp.deleteUserApp(idUserApp, motivo);
    }
 
 

@@ -63,6 +63,13 @@ public interface UserAppRepository extends JpaRepository<UserApp, Long>, JpaSpec
 
     Integer deleteByUserAppId(@NotNull Long idUserApp) throws Exception;
 
+    @Modifying
+    @Query("UPDATE UserApp u SET u.status = :status, u.motivo = :motivo WHERE u.userAppId = :idUserApp")
+    int  updateStatusAndMotivo(@Param("status") RowStatus status,
+                               @Param("motivo") String motivo,
+                               @Param("idUserApp") Long idUserApp) throws Exception;
+
+
     /**
      * Método para obtener todos los usuarios o buscar un usuario cuando se es Admin Sre22052020
      * @param username  nombre de usuario.

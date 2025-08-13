@@ -54,7 +54,7 @@ public interface UserAppService {
      * <br/>.1.- Si ocurre algún error  al eliminar en base de datos
      * <br/>2.- Si no se encuentra el usuario en la bd.
      * **/
-    void deleteUserApp (Long idUserApp) throws UserAppException;
+    void deleteUserApp (Long idUserApp, String motivo) throws UserAppException;
 
     /**
      * Método para obtener los detalles de un usuario

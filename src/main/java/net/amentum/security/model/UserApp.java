@@ -52,6 +52,9 @@ public class UserApp  implements Serializable {
     @Column(name = "curp", unique = true)
     private String curp;
 
+    @Column(name = "motivo")
+    private String motivo;
+
     @Enumerated(EnumType.STRING)
     private RowStatus status;
 
@@ -124,6 +127,14 @@ public class UserApp  implements Serializable {
 
     public void setCurp(String curp) {
         this.curp = curp;
+    }
+
+    public String getMotivo() {
+        return motivo;
+    }
+
+    public void setMotivo(String motivo) {
+        this.motivo = motivo;
     }
 
     public String getPassword() {return password;}
@@ -257,6 +268,7 @@ public class UserApp  implements Serializable {
                 ", createdDate=" + createdDate +
                 ", name='" + name + '\'' +
                 ", status=" + status +
+                ", motivo=" + motivo +
                 ", customerId=" + customerId +
                 ", infoList=" + infoList +
                 ", profile=" + profile +
