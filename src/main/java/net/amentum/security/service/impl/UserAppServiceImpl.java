@@ -582,212 +582,132 @@ public class UserAppServiceImpl implements UserAppService {
    /**
     * {@inheritDoc}
     * */
-   public Page<UserAppPageView> findUsers(@NotNull String name, @NotNull Integer page, @NotNull Integer size, @NotNull Long idGroup, String columnOrder, String orderType,
-                                          List<Long> idUsersList) throws UserAppException {
-      try {
-         Sort sort = new Sort(Sort.Direction.ASC, (String) colOrderNames.get("idUserApp"));
-
-         if (columnOrder != null && orderType != null) {
-            if (orderType.equalsIgnoreCase("asc"))
-               sort = new Sort(Sort.Direction.ASC, (String) colOrderNames.get(columnOrder));
-            else
-               sort = new Sort(Sort.Direction.DESC, (String) colOrderNames.get(columnOrder));
-         }
-         String likePattern = Utils.getPatternLike(name);
-         PageRequest pageRequest = new PageRequest(page, size, sort);
-         Page<UserApp> pageUsers = userAppRepository.findUserApp(likePattern, likePattern, likePattern, likePattern, idUsersList, pageRequest);
-         //coleccion con vistas
-         List<UserAppPageView> users = new ArrayList<>();
-
-         //llenar con vista con valores obtenidos de base de datos
-         pageUsers.getContent().forEach(userApp -> {
-            ArrayList<GroupView> groups = new ArrayList<>();
-            ArrayList<Long> idGroups = new ArrayList<>();
-            for (UserHasGroup g : userApp.getGroupList()) {
-               if(g.getGroup().getActive()) {
-                  idGroups.add(g.getGroup().getGroupId());
-                  GroupView view = new GroupView();
-                  view.setGroupName(g.getGroup().getGroupName());
-                  groups.add(view);
-               }
+    public Page<UserAppPageView> findUsers(@NotNull String name,
+                                           @NotNull Integer page,
+                                           @NotNull Integer size,
+                                           @NotNull Long idGroup,
+                                           String columnOrder,
+                                           String orderType,
+                                           List<Long> idUsersList) throws UserAppException {
+        try {
+            // Orden por default seguro
+            Sort sort = new Sort(Sort.Direction.ASC, (String) colOrderNames.get("idUserApp"));
+            if (columnOrder != null && orderType != null && colOrderNames.containsKey(columnOrder)) {
+                sort = orderType.equalsIgnoreCase("asc")
+                        ? new Sort(Sort.Direction.ASC, (String) colOrderNames.get(columnOrder))
+                        : new Sort(Sort.Direction.DESC, (String) colOrderNames.get(columnOrder));
             }
-            logger.info("Grupos agregados a la lista para el usuario {} - {} ", userApp.getUsername(), idGroups.toString());
-            if(idGroups.contains(idGroup))
-               users.add(new UserAppPageView(userApp.getUserAppId(), userApp.getUsername(), userApp.getEmail(), userApp.getName(), userApp.getProfile().getProfileName(), groups));
-            else
-               logger.info("Usuario no añadido {} - lista de grupos {}", userApp.getUsername(), groups.toString());
-         });
 
-         //añadimos resultados encontrados en group con el patrón recibido
-         if(!name.isEmpty() && (users.size() < size) ) {
-            sort = new Sort(Sort.Direction.ASC, "groupId");
-            pageRequest = new PageRequest(page,size,sort);
-            Page<Group> groups = groupRepository.findAllGroupActiveByNameLike(Utils.getPatternLike(name), true, pageRequest);
-            ArrayList<Integer> idGrupos = new ArrayList<>();
-            groups.forEach(group -> idGrupos.add(group.getGroupId().intValue()));
-            if(idGrupos.size() > 0) {
-               List<BigInteger> usersInGroup = userHasGroupRepository.obtenerIdUserAppGrupos(idGrupos);
-               logger.info("Tamaño de lista de usuarios actual - {} - Paginación - {} ", users.size(), size);
-               logger.info("-------------------------------------------------------------------------------------");
-               logger.info("Lista de ID de grupos obtenida en repo: {} ", idGrupos);
-               logger.info("-------------------------------------------------------------------------------------");
-               logger.info("Lista de ID de usuarios obtenida en repo: {} ", usersInGroup);
-               logger.info("-------------------------------------------------------------------------------------");
-               for (BigInteger id : usersInGroup) {
-                  try {
-                     boolean repeatUser = false;
-                     UserApp user = userAppRepository.findByUserAppId(id.longValue());
-                     logger.info("Usuario {} - id {}", user.getUsername(), user.getUserAppId());
-                     //Verificamos que el usuario no este repetido
-                     for (UserAppPageView view : users) {
-                        if (view.getIdUserApp() == user.getUserAppId()) {
-                           logger.info("Usuario repetido");
-                           repeatUser = true;
-                           break;
+            final PageRequest pageRequest = new PageRequest(page, size, sort);
+            final String like = Utils.getPatternLike(name);
+
+            // 🔴 CAMBIO CLAVE: filtrar por grupo (y por ids si aplica) DESDE EL REPOSITORIO
+            Page<UserApp> pageUsers = (idUsersList != null && !idUsersList.isEmpty())
+                    ? userAppRepository.findUserAppByGroupAndIds(
+                    idGroup, idUsersList, like, like, like, like, pageRequest
+            )
+                    : userAppRepository.findUserAppByGroupAndIds(
+                    idGroup, null,      like, like, like, like, pageRequest
+            );
+
+            // Map directo (sin filtrados posteriores)
+            return pageUsers.map(userApp -> {
+                ArrayList<GroupView> groups = new ArrayList<>();
+                if (userApp.getGroupList() != null) {
+                    for (UserHasGroup g : userApp.getGroupList()) {
+                        if (g.getGroup() != null && Boolean.TRUE.equals(g.getGroup().getActive())) {
+                            GroupView gv = new GroupView();
+                            gv.setGroupName(g.getGroup().getGroupName());
+                            groups.add(gv);
                         }
-                     }
-                     if(repeatUser)
-                        continue;
-                     ArrayList<GroupView> groupList = new ArrayList<>();
-                     ArrayList<Long> idGroups = new ArrayList<>();
-                     for (UserHasGroup g : user.getGroupList()) {
-                        if(g.getGroup().getActive()) {
-                           idGroups.add(g.getGroup().getGroupId());
-                           GroupView view = new GroupView();
-                           view.setGroupName(g.getGroup().getGroupName());
-                           groupList.add(view);
-                        }
-                     }
-                     if(users.size() < size && idGroups.contains(idGroup))
-                        users.add(new UserAppPageView(user.getUserAppId(), user.getUsername(), user.getEmail(), user.getName(), user.getProfile().getProfileName(), groupList));
-                     else
-                        logger.info("Usuario no añadido {} - lista de grupos {}", user.getUsername(), groups.toString());
-                  } catch (Exception e) {
-                     e.printStackTrace();
-                     break;
-                  }
-               }
+                    }
+                }
+                return new UserAppPageView(
+                        userApp.getUserAppId(),
+                        userApp.getUsername(),
+                        userApp.getEmail(),
+                        userApp.getName(),
+                        userApp.getProfile() != null ? userApp.getProfile().getProfileName() : null,
+                        groups
+                );
+            });
+
+        } catch (Exception ex) {
+            UserAppException uae = new UserAppException("Ocurrio un error al seleccionar lista de usuarios",
+                    UserAppException.LAYER_DAO, UserAppException.ACTION_SELECT);
+            logger.error("Error al seleccionar lista de usuarios - CODE: {} - {}", uae.getExceptionCode(), ex);
+            throw uae;
+        }
+    }
+
+
+    @Override
+/**
+ * {@inheritDoc}
+ */
+    public Page<UserAppPageView> findUsersAdmin(@NotNull String name,
+                                                @NotNull Integer page,
+                                                @NotNull Integer size,
+                                                @NotNull Long idGroup,
+                                                String columnOrder,
+                                                String orderType,
+                                                List<Long> idUsersList) throws UserAppException {
+        try {
+            // Orden por default
+            Sort sort = new Sort(Sort.Direction.ASC, (String) colOrderNames.get("idUserApp"));
+            if (columnOrder != null && orderType != null && colOrderNames.containsKey(columnOrder)) {
+                sort = orderType.equalsIgnoreCase("asc")
+                        ? new Sort(Sort.Direction.ASC, (String) colOrderNames.get(columnOrder))
+                        : new Sort(Sort.Direction.DESC, (String) colOrderNames.get(columnOrder));
             }
-         }
 
-         logger.info("-------------------------------------------------------------------------------------");
-         logger.info("Usuarios con grupos: {} ", users);
-         logger.info("-------------------------------------------------------------------------------------");
+            String likePattern = Utils.getPatternLike(name);
+            PageRequest pageRequest = new PageRequest(page, size, sort);
 
-         return new PageImpl<UserAppPageView>(users, pageRequest, pageUsers.getTotalElements());
-      } catch (Exception ex) {
-         UserAppException uae = new UserAppException("Ocurrio un error al seleccionar lista de usuarios", UserAppException.LAYER_DAO, UserAppException.ACTION_SELECT);
-         logger.error("Error al seleccionar lista de usuarios - CODE: {} - {}", uae.getExceptionCode(), ex);
-         throw uae;
-      }
-   }
+            // 🔴 CAMBIO CLAVE: la consulta YA filtra por grupo en el repositorio (antes de paginar)
+            Page<UserApp> pageUsers = userAppRepository.findUserAppAdminByGroup(
+                    idGroup,               // <-- nuevo primer parámetro
+                    likePattern,           // username
+                    likePattern,           // email
+                    likePattern,           // name
+                    likePattern,           // profile.profileName
+                    pageRequest
+            );
 
-   @Override
-   /**
-    * {@inheritDoc}
-    * */
-   public Page<UserAppPageView> findUsersAdmin(@NotNull String name, @NotNull Integer page, @NotNull Integer size, @NotNull Long idGroup, String columnOrder, String orderType,
-                                          List<Long> idUsersList) throws UserAppException {
-       // Sre22052020 Agregado
-       try {
-         Sort sort = new Sort(Sort.Direction.ASC, (String) colOrderNames.get("idUserApp"));
-         if (columnOrder != null && orderType != null) {
-            if (orderType.equalsIgnoreCase("asc"))
-               sort = new Sort(Sort.Direction.ASC, (String) colOrderNames.get(columnOrder));
-            else
-               sort = new Sort(Sort.Direction.DESC, (String) colOrderNames.get(columnOrder));
-         }
-         String likePattern = Utils.getPatternLike(name);
-         PageRequest pageRequest = new PageRequest(page, size, sort);
-         Page<UserApp> pageUsers = userAppRepository.findUserAppAdmin(likePattern, likePattern, likePattern, likePattern, pageRequest);
-
-         //coleccion con vistas
-         List<UserAppPageView> users = new ArrayList<>();
-
-         //llenar con vista con valores obtenidos de base de datos
-         pageUsers.getContent().forEach(userApp -> {
-            ArrayList<GroupView> groups = new ArrayList<>();
-            ArrayList<Long> idGroups = new ArrayList<>();
-            for (UserHasGroup g : userApp.getGroupList()) {
-               if(g.getGroup().getActive()) {
-                  idGroups.add(g.getGroup().getGroupId());
-                  GroupView view = new GroupView();
-                  view.setGroupName(g.getGroup().getGroupName());
-                  groups.add(view);
-               }
-            }
-            logger.info("Grupos agregados a la lista para el usuario {} - {} ", userApp.getUsername(), idGroups.toString());
-            if(idGroups.contains(idGroup))
-               users.add(new UserAppPageView(userApp.getUserAppId(), userApp.getUsername(), userApp.getEmail(), userApp.getName(), userApp.getProfile().getProfileName(), groups));
-            else
-               logger.info("Usuario no añadido {} - lista de grupos {}", userApp.getUsername(), groups.toString());
-         });
-
-         //añadimos resultados encontrados en group con el patrón recibido
-         if(!name.isEmpty() && (users.size() < size) ) {
-            sort = new Sort(Sort.Direction.ASC, "groupId");
-            pageRequest = new PageRequest(page,size,sort);
-            Page<Group> groups = groupRepository.findAllGroupActiveByNameLike(Utils.getPatternLike(name), true, pageRequest);
-            ArrayList<Integer> idGrupos = new ArrayList<>();
-            groups.forEach(group -> idGrupos.add(group.getGroupId().intValue()));
-            if(idGrupos.size() > 0) {
-               List<BigInteger> usersInGroup = userHasGroupRepository.obtenerIdUserAppGrupos(idGrupos);
-               logger.info("Tamaño de lista de usuarios actual - {} - Paginación - {} ", users.size(), size);
-               logger.info("-------------------------------------------------------------------------------------");
-               logger.info("Lista de ID de grupos obtenida en repo: {} ", idGrupos);
-               logger.info("-------------------------------------------------------------------------------------");
-               logger.info("Lista de ID de usuarios obtenida en repo: {} ", usersInGroup);
-               logger.info("-------------------------------------------------------------------------------------");
-               for (BigInteger id : usersInGroup) {
-                  try {
-                     boolean repeatUser = false;
-                     UserApp user = userAppRepository.findByUserAppId(id.longValue());
-                     logger.info("Usuario {} - id {}", user.getUsername(), user.getUserAppId());
-                     //Verificamos que el usuario no este repetido
-                     for (UserAppPageView view : users) {
-                        if (view.getIdUserApp() == user.getUserAppId()) {
-                           logger.info("Usuario repetido");
-                           repeatUser = true;
-                           break;
+            // Map directo sin volver a filtrar por grupo en memoria
+            return pageUsers.map(userApp -> {
+                ArrayList<GroupView> groups = new ArrayList<>();
+                if (userApp.getGroupList() != null) {
+                    for (UserHasGroup g : userApp.getGroupList()) {
+                        if (g.getGroup() != null && Boolean.TRUE.equals(g.getGroup().getActive())) {
+                            GroupView gv = new GroupView();
+                            gv.setGroupName(g.getGroup().getGroupName());
+                            groups.add(gv);
                         }
-                     }
-                     if(repeatUser)
-                        continue;
-                     ArrayList<GroupView> groupList = new ArrayList<>();
-                     ArrayList<Long> idGroups = new ArrayList<>();
-                     for (UserHasGroup g : user.getGroupList()) {
-                        if(g.getGroup().getActive()) {
-                           idGroups.add(g.getGroup().getGroupId());
-                           GroupView view = new GroupView();
-                           view.setGroupName(g.getGroup().getGroupName());
-                           groupList.add(view);
-                        }
-                     }
-                     if(users.size() < size && idGroups.contains(idGroup))
-                        users.add(new UserAppPageView(user.getUserAppId(), user.getUsername(), user.getEmail(), user.getName(), user.getProfile().getProfileName(), groupList));
-                     else
-                        logger.info("Usuario no añadido {} - lista de grupos {}", user.getUsername(), groups.toString());
-                  } catch (Exception e) {
-                     e.printStackTrace();
-                     break;
-                  }
-               }
-            }
-         }
+                    }
+                }
+                return new UserAppPageView(
+                        userApp.getUserAppId(),
+                        userApp.getUsername(),
+                        userApp.getEmail(),
+                        userApp.getName(),
+                        userApp.getProfile() != null ? userApp.getProfile().getProfileName() : null,
+                        groups
+                );
+            });
 
+        } catch (Exception ex) {
+            UserAppException uae = new UserAppException(
+                    "Ocurrio un error al seleccionar lista de usuarios",
+                    UserAppException.LAYER_DAO,
+                    UserAppException.ACTION_SELECT
+            );
+            logger.error("Error al seleccionar lista de usuarios - CODE: {} - {}", uae.getExceptionCode(), ex);
+            throw uae;
+        }
+    }
 
-         logger.info("-------------------------------------------------------------------------------------");
-         logger.info("Usuarios con grupos: {} ", users);
-
-          return new PageImpl<UserAppPageView>(users, pageRequest, pageUsers.getTotalElements());
-      } catch (Exception ex) {
-         UserAppException uae = new UserAppException("Ocurrio un error al seleccionar lista de usuarios", UserAppException.LAYER_DAO, UserAppException.ACTION_SELECT);
-         logger.error("Error al seleccionar lista de usuarios - CODE: {} - {}", uae.getExceptionCode(), ex);
-         throw uae;
-      }
-   }
-   
-   @Override
+    @Override
    /**
     * {@inheritDoc}
     * */

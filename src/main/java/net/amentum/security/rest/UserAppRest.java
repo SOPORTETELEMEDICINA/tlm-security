@@ -130,7 +130,7 @@ public class UserAppRest extends BaseController {
          view.setName("");
        // Sre22052020 Inicia si usuario es admin view.getIdUsersList() viene en null
        if (view.getIdUsersList() == null) {
-           return serviceUserApp.findUsersAdmin(view.getName(), view.getPage(), view.getSize(), view.getGroup(), view.getOrderColumn(), view.getOrderType(), view.getIdUsersList());
+           return serviceUserApp.findUsersAdmin(view.getName(), view.getPage(), view.getSize(), view.getGroup(), view.getOrderColumn(), view.getOrderType(), null);
        }
       return serviceUserApp.findUsers(view.getName(), view.getPage(), view.getSize(), view.getGroup(), view.getOrderColumn(), view.getOrderType(), view.getIdUsersList());
        // Sre22052020 Termina

@@ -93,4 +93,39 @@ public interface UserAppRepository extends JpaRepository<UserApp, Long>, JpaSpec
             "join shift_hour hor on ws.id_work_shift = hor.id_work_shift " +
             "where usu.id_user_app = :idUserApp", nativeQuery = true)
     String findHorarioByIdUser (@Param("idUserApp")Long idUserApp) throws Exception;
+
+    @Query("SELECT DISTINCT u FROM UserApp u " +
+            "JOIN u.groupList ug " +
+            "JOIN ug.pk.group g " +                           // <- aquí el cambio
+            "WHERE g.groupId = :idGroup AND g.active = TRUE " +
+            "AND (LOWER(u.username) LIKE LOWER(:username) " +
+            "  OR LOWER(u.email) LIKE LOWER(:email) " +
+            "  OR LOWER(u.name) LIKE LOWER(:name) " +
+            "  OR LOWER(u.profile.profileName) LIKE LOWER(:profile))")
+    Page<UserApp> findUserAppAdminByGroup(@Param("idGroup") Long idGroup,
+                                          @Param("username") String username,
+                                          @Param("email") String email,
+                                          @Param("name") String name,
+                                          @Param("profile") String profile,
+                                          Pageable pageable);
+
+    @Query("SELECT DISTINCT u FROM UserApp u " +
+            "JOIN u.groupList ug " +
+            "JOIN ug.pk.group g " +                           // <- igual aquí
+            "WHERE g.groupId = :idGroup AND g.active = TRUE " +
+            "AND ( (:ids) IS NULL OR u.userAppId IN :ids ) " +
+            "AND (LOWER(u.username) LIKE LOWER(:username) " +
+            "  OR LOWER(u.email) LIKE LOWER(:email) " +
+            "  OR LOWER(u.name) LIKE LOWER(:name) " +
+            "  OR LOWER(u.profile.profileName) LIKE LOWER(:profile))")
+    Page<UserApp> findUserAppByGroupAndIds(@Param("idGroup") Long idGroup,
+                                           @Param("ids") List<Long> ids,
+                                           @Param("username") String username,
+                                           @Param("email") String email,
+                                           @Param("name") String name,
+                                           @Param("profile") String profile,
+                                           Pageable pageable);
+
+
+
 }
